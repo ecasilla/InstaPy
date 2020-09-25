@@ -2,15 +2,54 @@
 
 The **goal** of this file is explaining to the users of our project the notable changes _relevant to them_ that occurred _between_ commits.
 
-_The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)_.
+_The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)_
 
+## [0.6.11] - 2020-09-25
 
-## [Unreleased]
+### Added 
+- Use random tag list for `session.like_by_tags`
+
+### Changed
+- General log rotation, gecko driver log in user directory, comments in 80 chars
+
+### Fixed
+- Unfollowing of users that haven't posted anything
+- `get_links` xpath for yet another change
+- Path for Obtaining user id
+- `like_util.py` list index out of range error
+- `like_by_feed()` method
+- `follow_user_following
+- processing unexpected alert error on resize
+
+## [0.6.10] - 2020-07-30
+
+### Added
+- Generallize mandatory words and add mandatory_bio_keywords
+
+### Changed 
+- Update xpath for like/unlike and comment
+- Fix `like_by_feed()` xpath
+- `get_like_on_feed()` improve function readability
+
+### Fixed
+- "UnboundLocalError: local variable 'commenting_approved' referenced before assignment" error when bot tries to comment
+- Typo updating configuration object. Changed nofity into notify
+- Add specific firefox preference agent data to prevent error
+- Smart location url 
+- Error "Hide Selenium Extension: Error" mentioned in #5304
+- XPATH for like svg
+
+## [0.6.9] - 2020-06-12
 
 ### Added
 
 - Additional parameter `browser_executable_path` now available when initializing InstaPy. Use it to run a specific installation of Firefox.
 - A new feature - `target_list()` to parse text files containing target lists of users, hashtags etc.
+
+
+### Changed
+- Remove `view-source` which stops bot from proceeding 
+- Remove instagram status check
 
 
 ## [0.6.8] - 2020-01-28
