@@ -79,9 +79,14 @@ def is_private_profile(browser, logger, following=True):
     """
 
     shared_data = get_shared_data(browser)
-    is_private = shared_data["entry_data"]["ProfilePage"][0]["graphql"]["user"][
-        "is_private"
-    ]
+    data = shared_data["entry_data"]["ProfilePage"][0]
+
+    # Sometimes shared_data["entry_data"]["ProfilePage"][0] is empty, but get_additional_data()
+    # fetches all data needed
+    if not data:
+        data = get_additional_data(browser)
+
+    is_private = data["graphql"]["user"]["is_private"]
 
     return is_private
 
@@ -408,7 +413,7 @@ def validate_username(
         if skip_non_business and not is_business_account:
             return (
                 False,
-                "--> Skiping non business because skip_non_business set to True",
+                "--> Skipping non business because skip_non_business set to True",
             )
 
         if is_business_account:
@@ -481,6 +486,11 @@ def getUserData(
 ):
     shared_data = get_shared_data(browser)
     data = shared_data["entry_data"]["ProfilePage"][0]
+
+    # Sometimes shared_data["entry_data"]["ProfilePage"][0] is empty, but get_additional_data()
+    # fetches all data needed
+    if not data:
+        data = get_additional_data(browser)
 
     if query.find(".") == -1:
         data = data[query]
@@ -1022,7 +1032,7 @@ def click_element(browser, element, tryNum=0):
     specific case. See the following issue for more details
     https://github.com/timgrossmann/InstaPy/issues/1232
 
-    explaination of the following recursive function:
+    explanation of the following recursive function:
       we will attempt to click the element given, if an error is thrown
       we know something is wrong (element not in view, element doesn't
       exist, ...). on each attempt try and move the screen around in
@@ -2250,9 +2260,9 @@ def get_users_from_dialog(old_data, dialog, logger):
         return new_data
 
     except (NoSuchElementException, StaleElementReferenceException) as exc:
-        # Catch stale elemets if any
+        # Catch stale elements if any
         logger.error(
-            "Error occured while retrieving data.\n\t{}".format(
+            "Error occurred while retrieving data.\n\t{}".format(
                 str(exc).encode("utf-8")
             )
         )
@@ -2593,7 +2603,8 @@ def get_additional_data(browser):
     soup = BeautifulSoup(browser.page_source, "html.parser")
     for text in soup(text=re.compile(r"window.__additionalDataLoaded")):
         if re.search("^window.__additionalDataLoaded", text):
-            additional_data = json.loads(text[48:-2])
+            additional_data = json.loads(re.search("{.*}", text).group())
+            break
 
     return additional_data
 
@@ -2610,6 +2621,7 @@ def get_shared_data(browser):
     soup = BeautifulSoup(browser.page_source, "html.parser")
     for text in soup(text=re.compile(r"window._sharedData")):
         if re.search("^window._sharedData", text):
-            shared_data = json.loads(text[21:-1])
+            shared_data = json.loads(re.search("{.*}", text).group())
+            break
 
     return shared_data

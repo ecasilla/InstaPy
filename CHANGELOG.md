@@ -4,32 +4,14 @@ The **goal** of this file is explaining to the users of our project the notable 
 
 _The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)_
 
-## [0.6.18] - UNRELEASED
 
-### Added
+## [0.6.15] - 2021-12-02
 
-- Skipping of public account with (optional) percentage
+### Fixed
 
-## [0.6.17] - UNRELEASED
+- Fixed `relationship_tools` to check if not `username == self_username`
 
-### Added
-
-- Fixed getting additional data from page source
-
-## [0.6.16] - UNRELEASED
-
-### Added
-
-- Fix user following and verification of follow
-
-## [0.6.15] - UNRELEASED
-
-### Added
-
-- Added `verified_only` argument to `get_followers` to return only verified users
-- `mandatory_bio_keywords` control before evaluating for mandatory
-
-## [0.6.14] - UNRELEASED
+## [0.6.14] - 2021-10-18
 
 ### Added
 
@@ -39,6 +21,10 @@ _The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Added second `accept_igcookie_dialogue` to handled the second "cookie accept screen" that is not automatically accepted
 - Added delays after `update_activity()` in `follow_util.py` and `util.py`
 - Added extra trace in `get_followers()`
+- Added `verified_only` argument to `get_followers` to return only verified users
+- `mandatory_bio_keywords` control before evaluating for mandatory
+- Fix user following and verification of follow
+- Skipping of public account with (optional) percentage
 
 ### Fixed
 
@@ -46,6 +32,15 @@ _The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Fixed the correct URL `displaypurposes.com`, the old `displaypurposes.com` API is deprecated
 - Fixed `additional-information.md`, removed extra info for `cron` configuration
 - Fixed `actions.md` and `settings.md` for identation
+- Fixed getting additional data from page source
+- Fixed xpath for when images cannot be detected
+- Fixed empty shared data
+- Cannot detect post media type
+- Updated xpath Image "Like" and "Unlike"
+
+### Changed
+
+- Change the ip data supplier to https://freegeoip.app/ from https://seeip.org/
 
 ## [0.6.13] - 2020-12-30
 

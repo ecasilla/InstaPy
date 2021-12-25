@@ -79,7 +79,7 @@ def get_followers(
 
     is_private = is_private_profile(browser, logger, following_status == "Following")
 
-    if (
+    if not username == self_username and (
         is_private is None
         or (is_private is True and following_status not in ["Following", True])
         or (following_status == "Blocked")
@@ -372,7 +372,7 @@ def get_following(
     )
 
     is_private = is_private_profile(browser, logger, following_status == "Following")
-    if (
+    if not username == self_username and (
         is_private is None
         or (is_private is True and following_status not in ["Following", True])
         or (following_status == "Blocked")
@@ -942,7 +942,7 @@ def get_mutual_following(
 
 
 def store_followers_data(username, grab, grabbed_followers, logger, logfolder):
-    """Store grabbed `Followers` data in a local storage at genereated date"""
+    """Store grabbed `Followers` data in a local storage at generated date"""
     query_date = datetime.today().strftime("%d-%m-%Y")
     grabbed_followers_size = len(grabbed_followers)
     file_directory = "{}/relationship_data/{}/followers/".format(logfolder, username)

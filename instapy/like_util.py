@@ -2,37 +2,44 @@
 # import built-in & third-party modules
 import random
 import re
-
 from re import findall
 
-# import InstaPy modules
-from .constants import MEDIA_PHOTO
-from .constants import MEDIA_CAROUSEL
-from .constants import MEDIA_ALL_TYPES
-from .time_util import sleep
-from .util import format_number
-from .util import add_user_to_blacklist
-from .util import click_element
-from .util import is_private_profile
-from .util import is_page_available
-from .util import update_activity
-from .util import web_address_navigator
-from .util import get_number_of_posts
-from .util import get_action_delay
-from .util import explicit_wait
-from .util import extract_text_from_element
-from .util import evaluate_mandatory_words
-from .util import get_additional_data
-from .quota_supervisor import quota_supervisor
-from .follow_util import get_following_status
-from .event import Event
-from .xpath import read_xpath
-from .comment_util import open_comment_section
-
 # import exceptions
-from selenium.common.exceptions import WebDriverException
-from selenium.common.exceptions import NoSuchElementException
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    StaleElementReferenceException,
+    WebDriverException,
+)
+
+# import InstaPy modules
+from .comment_util import open_comment_section
+from .constants import (
+    MEDIA_ALL_TYPES,
+    MEDIA_CAROUSEL,
+    MEDIA_IGTV,
+    MEDIA_PHOTO,
+    MEDIA_VIDEO,
+)
+from .event import Event
+from .follow_util import get_following_status
+from .quota_supervisor import quota_supervisor
+from .time_util import sleep
+from .util import (
+    add_user_to_blacklist,
+    click_element,
+    evaluate_mandatory_words,
+    explicit_wait,
+    extract_text_from_element,
+    format_number,
+    get_action_delay,
+    get_additional_data,
+    get_number_of_posts,
+    is_page_available,
+    is_private_profile,
+    update_activity,
+    web_address_navigator,
+)
+from .xpath import read_xpath
 
 
 def get_links_from_feed(browser, amount, num_of_search, logger):
@@ -356,7 +363,7 @@ def get_links_for_tag(browser, tag, amount, skip_top_posts, randomize, media, lo
                 sc_rolled += 1
                 sleep(nap)  # if not slept, and internet speed is low,
                 # instagram will only scroll one time, instead of many times
-                # you sent scoll command...
+                # you sent scroll command...
 
             sleep(3)
             links.extend(get_links(browser, tag, logger, media, main_elem))
@@ -530,7 +537,7 @@ def get_links_for_username(
 
 
 def get_media_edge_comment_string(media):
-    """AB test (Issue 3712) alters the string for media edge, this resoves it"""
+    """AB test (Issue 3712) alters the string for media edge, this resolves it"""
     options = ["edge_media_to_comment", "edge_media_preview_comment"]
     for option in options:
         try:
@@ -654,7 +661,7 @@ def check_link(
         image_text = "No description"
 
     logger.info("Image from: {}".format(user_name.encode("utf-8")))
-    logger.info("Link: {}".format(post_link.encode("utf-8")))
+    logger.info("Image link: {}".format(post_link.encode("utf-8")))
     logger.info("Description: {}".format(image_text.encode("utf-8")))
 
     # Check if mandatory character set, before adding the location to the text
@@ -757,6 +764,8 @@ def like_image(browser, username, blacklist, logger, logfolder, total_liked_img)
     if len(like_elem) == 1:
         # sleep real quick right before clicking the element
         sleep(2)
+        logger.info("--> {}...".format(media))
+
         like_elem = browser.find_elements_by_xpath(like_xpath)
         if len(like_elem) > 0:
             click_element(browser, like_elem[0])
@@ -855,17 +864,29 @@ def get_links(browser, page, logger, media, element):
                         "//a[@href='/p/" + post_href.split("/")[-2] + "/']/child::div"
                     )
 
+                    logger.info("Verifying media type: {}".format(media))
+
                     if len(post_elem) == 1 and MEDIA_PHOTO in media:
-                        # Single photo
+                        logger.info("Found media type: {}".format(MEDIA_PHOTO))
                         links.append(post_href)
 
                     if len(post_elem) == 2:
-                        # Carousel or Video
+                        logger.info(
+                            "Found media type: {} - {} - {}".format(
+                                MEDIA_CAROUSEL, MEDIA_VIDEO, MEDIA_IGTV
+                            )
+                        )
+                        # If you see "Cannot detect post media type. Skip https://www.instagram.com/p/CFvUn0gpaMZ/"
+                        # consider updating the @class,'CzVzU', new format types could be added
+                        # Media types from constants.py must be updated here, otherwise the links
+                        # cannot be categorized.
                         post_category = element.find_element_by_xpath(
                             "//a[@href='/p/"
                             + post_href.split("/")[-2]
-                            + "/']/child::div[@class='u7YqG']/child::span"
+                            + "/']/div[contains(@class,'CzVzU')]/child::*/*[name()='svg']"
                         ).get_attribute("aria-label")
+
+                        logger.info("Post category: {}".format(post_category))
 
                         if post_category in media:
                             links.append(post_href)
@@ -874,7 +895,7 @@ def get_links(browser, page, logger, media, element):
                     # If "post_href" is None skip the logger to avoid confusion,
                     # the links that are not empty will be catched into the next
                     # loop. Other case, the "post_href" is not empty and needs
-                    # to be displayed to the STDOUT fo further review.
+                    # to be displayed to the STDOUT for further review.
                     if post_href:
                         logger.info(
                             "Cannot detect post media type. Skip {}".format(post_href)
@@ -884,6 +905,15 @@ def get_links(browser, page, logger, media, element):
 
     except BaseException as e:
         logger.error("link_elems error \n\t{}".format(str(e).encode("utf-8")))
+
+    # This block is intended to provide more information to the InstaPy user, they would like to
+    # know why the Links cannot be "[Un]Liked", I would like to say that first check if the Media
+    # Type is new, second check if the xpath has been updated and finally verify the acct is not
+    # under a cold-down stage.
+    # If the user can use the link outside InstaPy, they would know IG targeted the acct as
+    # automated.
+    for i, link in enumerate(links):
+        logger.info("Links retrieved:: [{}/{}]".format(i + 1, link))
 
     return links
 
@@ -908,7 +938,7 @@ def verify_liking(browser, maximum, minimum, logger):
         return False
     elif minimum is not None and likes_count < minimum:
         logger.info(
-            "Not liked this post! ~less likes exist off minumum limit "
+            "Not liked this post! ~less likes exist off minimum limit "
             "at {}".format(likes_count)
         )
         return False
@@ -963,7 +993,7 @@ def like_comment(browser, original_comment_text, logger):
 
     except (NoSuchElementException, StaleElementReferenceException) as exc:
         logger.error(
-            "Error occured while liking a comment.\n\t{}".format(
+            "Error occurred while liking a comment.\n\t{}".format(
                 str(exc).encode("utf-8")
             )
         )
